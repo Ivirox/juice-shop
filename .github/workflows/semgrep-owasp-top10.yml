@@ -1,0 +1,42 @@
+name: 🛡️ Semgrep - OWASP Top 10
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  semgrep-owasp:
+
+    name: Auditoría OWASP Top 10
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: semgrep/semgrep
+
+    steps:
+
+      - name: 📥 Obtener código
+        uses: actions/checkout@v6
+
+      - name: 🛡️ Ejecutar Semgrep - OWASP Top 10
+        run: |
+          TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
+
+          semgrep scan \
+            --config p/owasp-top-ten \
+            --json \
+            --output "aud-owasp-top10-${TIMESTAMP}.json" \
+            .
+
+      - name: 📦 Guardar evidencia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-owasp-top10-results
+          path: aud-owasp-top10-*.json
