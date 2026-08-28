@@ -1,0 +1,42 @@
+name: 🔎 Semgrep - Auditoría General
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  semgrep-general:
+
+    name: Auditoría General
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: semgrep/semgrep
+
+    steps:
+
+      - name: 📥 Obtener código
+        uses: actions/checkout@v6
+
+      - name: 🔎 Ejecutar Semgrep - General
+        run: |
+          TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
+
+          semgrep scan \
+            --config auto \
+            --json \
+            --output "aud-general-${TIMESTAMP}.json" \
+            .
+
+      - name: 📦 Guardar evidencia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-general-results
+          path: aud-general-*.json
